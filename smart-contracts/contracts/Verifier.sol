@@ -19,6 +19,14 @@ contract Verifier {
         Pairing.G1Point[4] IC;
     }
 
+    struct UserVerificationVerifyingKey {
+        Pairing.G1Point alfa1;
+        Pairing.G2Point beta2;
+        Pairing.G2Point gamma2;
+        Pairing.G2Point delta2;
+        Pairing.G1Point[2] IC;
+    }
+
     struct Proof {
         Pairing.G1Point A;
         Pairing.G2Point B;
@@ -126,6 +134,91 @@ contract Verifier {
         );
     }
 
+    function userVerificationVerifyingKey()
+        internal
+        pure
+        returns (UserVerificationVerifyingKey memory vk)
+    {
+        vk.alfa1 = Pairing.G1Point(
+            uint256(
+                2445079269178138229679395993073006067701843286239516539677882419486366047040
+            ),
+            uint256(
+                4464259855892990210593517323452891502524582708500326591560431360784512982065
+            )
+        );
+        vk.beta2 = Pairing.G2Point(
+            [
+                uint256(
+                    2421622039398904942731657550126589261742583800696341260164492906044814649292
+                ),
+                uint256(
+                    14430101405140674821764935443375597231553497464638668187252029598741089747861
+                )
+            ],
+            [
+                uint256(
+                    16729329078473767938522610523728342403150625098125533539085995210526893894538
+                ),
+                uint256(
+                    14027780176630153209387697441512620497833461399937222430069215954018522140599
+                )
+            ]
+        );
+        vk.gamma2 = Pairing.G2Point(
+            [
+                uint256(
+                    15147772983325975276396371918603025020461851921782017561072788330192332004191
+                ),
+                uint256(
+                    2775248203976049426982712325679738022523147450581765341910796489315310365909
+                )
+            ],
+            [
+                uint256(
+                    8919189678186151004629658054452948201290191727631123653999410683458848237294
+                ),
+                uint256(
+                    7986664551731562365729589315273185245463640323603085319025620388915173144086
+                )
+            ]
+        );
+        vk.delta2 = Pairing.G2Point(
+            [
+                uint256(
+                    4238873704655111825252546899871109459562599010186613856137818618304232060036
+                ),
+                uint256(
+                    20512473454973603680740982529976841717230051610484591798537479723732942563028
+                )
+            ],
+            [
+                uint256(
+                    18914574594437220377118892979551470672805670458493974279538172558254776558680
+                ),
+                uint256(
+                    19973683047090455649480286410531956132041752821277680915491337976116237837114
+                )
+            ]
+        );
+        vk.IC[0] = Pairing.G1Point(
+            uint256(
+                17248854395276967600719394295730297491804622169891960006681361149546252522961
+            ),
+            uint256(
+                13434251560703049240532132674306557525706346353273620822747767414256750987681
+            )
+        );
+        vk.IC[1] = Pairing.G1Point(
+            uint256(
+                5514763003239047857684947103547578997730591241515203394793271557749042644165
+            ),
+            uint256(
+                9804805470743809111161539701542373378436038025853836604935328711686591922893
+            )
+        );
+    }
+
     /*
      * @returns Whether the proof is valid given the hardcoded verifying key
      *          above and the public inputs
@@ -143,6 +236,62 @@ contract Verifier {
 
         UserResgistrationVerifyingKey
             memory vk = userRegistrationVerifyingKey();
+
+        // Compute the linear combination vk_x
+        Pairing.G1Point memory vk_x = Pairing.G1Point(0, 0);
+
+        // Make sure that proof.A, B, and C are each less than the prime q
+        require(proof.A.X < PRIME_Q, "verifier-aX-gte-prime-q");
+        require(proof.A.Y < PRIME_Q, "verifier-aY-gte-prime-q");
+
+        require(proof.B.X[0] < PRIME_Q, "verifier-bX0-gte-prime-q");
+        require(proof.B.Y[0] < PRIME_Q, "verifier-bY0-gte-prime-q");
+
+        require(proof.B.X[1] < PRIME_Q, "verifier-bX1-gte-prime-q");
+        require(proof.B.Y[1] < PRIME_Q, "verifier-bY1-gte-prime-q");
+
+        require(proof.C.X < PRIME_Q, "verifier-cX-gte-prime-q");
+        require(proof.C.Y < PRIME_Q, "verifier-cY-gte-prime-q");
+
+        // Make sure that every input is less than the snark scalar field
+        for (uint256 i = 0; i < input.length; i++) {
+            require(
+                input[i] < SNARK_SCALAR_FIELD,
+                "verifier-gte-snark-scalar-field"
+            );
+            vk_x = Pairing.plus(
+                vk_x,
+                Pairing.scalar_mul(vk.IC[i + 1], input[i])
+            );
+        }
+
+        vk_x = Pairing.plus(vk_x, vk.IC[0]);
+
+        return
+            Pairing.pairing(
+                Pairing.negate(proof.A),
+                proof.B,
+                vk.alfa1,
+                vk.beta2,
+                vk_x,
+                vk.gamma2,
+                proof.C,
+                vk.delta2
+            );
+    }
+
+    function userVerificationVerifyProof(
+        uint256[2] memory a,
+        uint256[2][2] memory b,
+        uint256[2] memory c,
+        uint256[1] memory input
+    ) public view returns (bool r) {
+        Proof memory proof;
+        proof.A = Pairing.G1Point(a[0], a[1]);
+        proof.B = Pairing.G2Point([b[0][0], b[0][1]], [b[1][0], b[1][1]]);
+        proof.C = Pairing.G1Point(c[0], c[1]);
+
+        UserVerificationVerifyingKey memory vk = userVerificationVerifyingKey();
 
         // Compute the linear combination vk_x
         Pairing.G1Point memory vk_x = Pairing.G1Point(0, 0);

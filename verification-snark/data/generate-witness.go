@@ -11,23 +11,15 @@ import (
 
 func GenerateWitness(content []byte) (circuit.TreeData, []string) {
 	var witness circuit.TreeData
-	var publicInputs [utils.NumPublicInputs]string
+	var publicInputs [1]string
 
 	var payload map[string]interface{}
 	err := json.Unmarshal(content, &payload)
 	utils.HandleError(err)
 
-	// OldMembersRoot
-	witness.OldMembersRoot = payload["OldMembersRoot"].(string)
-	publicInputs[0] = payload["OldMembersRoot"].(string)
-
-	// NewMembersRoot
-	witness.NewMembersRoot = payload["NewMembersRoot"].(string)
-	publicInputs[1] = payload["NewMembersRoot"].(string)
-
-	// Slot
-	witness.Slot = payload["Slot"].(string)
-	publicInputs[2] = payload["Slot"].(string)
+	// MembersRoot
+	witness.MembersRoot = payload["MembersRoot"].(string)
+	publicInputs[0] = payload["MembersRoot"].(string)
 
 	// User.PrivateID
 	witness.User.PrivateID = payload["User"].(map[string]interface{})["PrivateID"].(string)

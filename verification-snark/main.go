@@ -21,8 +21,8 @@ import (
 
 func main() {
 	http.HandleFunc("/", Handler)
-	fmt.Println("Server started on port 6969")
-	http.ListenAndServe(":6969", nil)
+	fmt.Println("Server started on port 6970")
+	http.ListenAndServe(":6970", nil)
 }
 
 func Handler(w http.ResponseWriter, r *http.Request) {
@@ -62,19 +62,19 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			pk, vk, err = groth16.Setup(r1cs)
 			utils.HandleError(err)
 			{
-				f, err := os.Create("exports/register-user-snark.vk")
+				f, err := os.Create("exports/verify-user-snark.vk")
 				utils.HandleError(err)
 				_, err = vk.WriteRawTo(f)
 				utils.HandleError(err)
 			}
 			{
-				f, err := os.Create("exports/register-user-snark.pk")
+				f, err := os.Create("exports/verify-user-snark.pk")
 				utils.HandleError(err)
 				_, err = pk.WriteRawTo(f)
 				utils.HandleError(err)
 			}
 			{
-				f, err := os.Create("exports/register-user-snark-verifier.sol")
+				f, err := os.Create("exports/verify-user-snark-verifier.sol")
 				utils.HandleError(err)
 				err = vk.ExportSolidity(f)
 				utils.HandleError(err)
@@ -82,14 +82,14 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		} else {
 			pk = groth16.NewProvingKey(ecc.BN254)
 			{
-				f, _ := os.Open("exports/register-user-snark.pk")
+				f, _ := os.Open("exports/verify-user-snark.pk")
 				_, err = pk.ReadFrom(f)
 				f.Close()
 				utils.HandleError(err)
 			}
 			vk = groth16.NewVerifyingKey(ecc.BN254)
 			{
-				f, _ := os.Open("exports/register-user-snark.vk")
+				f, _ := os.Open("exports/verify-user-snark.vk")
 				_, err = vk.ReadFrom(f)
 				f.Close()
 				utils.HandleError(err)

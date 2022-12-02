@@ -13,6 +13,7 @@ describe("Register User Tests", function () {
     let userTree: any;
 
     let registerUserSnarkInput: any = {};
+    let verifyUserSnarkInput: any = {};
 
     before(async () => {
         for (let i = 0; i < 8; i++) {
@@ -40,7 +41,7 @@ describe("Register User Tests", function () {
         for (let i = 0; i < 5; i++) {
             let privateID =
                 "0x" +
-                Math.floor(Math.random() * 100)
+                (i + Math.floor(Math.random() * 100))
                     .toString(16)
                     .padStart(64, "0");
 
@@ -84,6 +85,38 @@ describe("Register User Tests", function () {
                 res.data.Input
             );
             await registerUserTxn.wait();
+        }
+    });
+
+    it("should verify users", async () => {
+        for (let i = 0; i < 5; i++) {
+            verifyUserSnarkInput["MembersRoot"] = userTree.getHexRoot();
+            verifyUserSnarkInput["User"] = {};
+            verifyUserSnarkInput["User"]["PrivateID"] = userPreimages[i];
+            verifyUserSnarkInput["SlotProof"] = userTree.getHexProof(
+                userLeaves[i]
+            );
+            verifyUserSnarkInput["SlotHelper"] = userTree.getHelper(
+                userLeaves[i]
+            );
+
+            fs.writeFileSync(
+                "data/verify-user-snark-data.json",
+                JSON.stringify(verifyUserSnarkInput)
+            );
+
+            const url = "http://localhost:6970/";
+            const res: any = await axios.post(
+                url,
+                JSON.stringify(verifyUserSnarkInput)
+            );
+
+            const userVerificationTxn = await PrivacyAuth.verifyMember(
+                res.data.A,
+                res.data.B,
+                res.data.C,
+                res.data.Input
+            );
         }
     });
 });

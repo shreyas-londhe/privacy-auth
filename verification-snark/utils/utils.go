@@ -1,6 +1,6 @@
 package utils
 
-const NumPublicInputs = 3
+const NumPublicInputs = 1
 
 func HandleError(err error) {
 	if err != nil {

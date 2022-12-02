@@ -34,9 +34,19 @@ contract PrivacyAuth {
         membersRoot = bytes32(_publicInputs[1]);
     }
 
-    function verifyMember() public {
-        /*
-        1. Verify the zk-proof and return the result.
-         */
+    function verifyMember(
+        uint256[2] calldata _a,
+        uint256[2][2] calldata _b,
+        uint256[2] calldata _c,
+        uint256[1] calldata _publicInputs
+    ) public view {
+        require(
+            verifier.userVerificationVerifyProof(_a, _b, _c, _publicInputs),
+            "Invalid member zk proof"
+        );
+        require(
+            membersRoot == bytes32(_publicInputs[0]),
+            "invalid members root"
+        );
     }
 }
