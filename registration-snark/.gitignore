@@ -1,0 +1,6 @@
+/exports
+/vendor
+.DS_Store
+.env
+*.zip
+output.json
