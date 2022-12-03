@@ -1,18 +1,30 @@
 import { ethers } from "hardhat";
+const mimcjs = require("mimcjs-solidity");
+const MerkleTree = require("../utils/MerkleTree.js");
 
 async function main() {
-    const currentTimestampInSeconds = Math.round(Date.now() / 1000);
-    const ONE_YEAR_IN_SECS = 365 * 24 * 60 * 60;
-    const unlockTime = currentTimestampInSeconds + ONE_YEAR_IN_SECS;
+    let userPreimages: any = [];
+    let userLeaves: any = [];
+    let userTree: any;
 
-    const lockedAmount = ethers.utils.parseEther("1");
+    for (let i = 0; i < 8; i++) {
+        let defaultSlot = "0x" + i.toString(16).padStart(64, "0");
+        userPreimages.push(defaultSlot);
+        userLeaves.push(mimcjs.mimcHashAny([defaultSlot]).toString());
+    }
+    userTree = new MerkleTree(userLeaves);
 
-    const Lock = await ethers.getContractFactory("Lock");
-    const lock = await Lock.deploy(unlockTime, { value: lockedAmount });
+    const VerifierFactory = await ethers.getContractFactory("Verifier");
+    const Verifier = await VerifierFactory.deploy();
+    await Verifier.deployed();
 
-    await lock.deployed();
-
-    console.log("Lock with 1 ETH deployed to:", lock.address);
+    const PrivacyAuthFactory = await ethers.getContractFactory("PrivacyAuth");
+    const PrivacyAuth = await PrivacyAuthFactory.deploy(
+        userTree.getHexRoot(),
+        Verifier.address
+    );
+    await PrivacyAuth.deployed();
+    console.log("PrivacyAuth deployed to:", PrivacyAuth.address);
 }
 
 // We recommend this pattern to be able to use async/await everywhere
