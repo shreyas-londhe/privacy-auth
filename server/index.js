@@ -1,5 +1,7 @@
 // server/index.js
+const Contract = require("./contract.js");
 
+require("dotenv").config();
 const express = require("express");
 const app = express();
 const cors = require("cors");
@@ -41,4 +43,7 @@ app.post("/signin", function (req, res) {
 
 app.listen(PORT, () => {
   console.log(`Server listening on ${PORT}`);
+  Contract.generateInitialTree();
+  Contract.getContractInstance();
+  Contract.getCurrentMemberRoot();
 });
