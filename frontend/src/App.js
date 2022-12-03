@@ -3,8 +3,7 @@ import { ChakraProvider } from "@chakra-ui/react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 
 import Home from "./pages/Home";
-import Aadhar from "./pages/Aadhar";
-import PANCard from "./pages/PAN";
+import Auth from "./pages/Auth";
 
 function App() {
   return (
@@ -13,8 +12,7 @@ function App() {
         <Routes>
           <Route exact path="/" element={<Home />} />
           <Route exact path="/home" element={<Home />} />
-          <Route exact path="/aadhar" element={<Aadhar />} />
-          <Route exact path="/pancard" element={<PANCard />} />
+          <Route exact path="/aadhar" element={<Auth />} />
         </Routes>
       </Router>
     </ChakraProvider>

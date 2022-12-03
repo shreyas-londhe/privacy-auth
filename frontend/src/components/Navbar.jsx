@@ -25,12 +25,8 @@ const Links = [
     path: "/",
   },
   {
-    label: "Aadhar",
-    path: "/aadhar",
-  },
-  {
-    label: "PAN Card",
-    path: "/pancard",
+    label: "Privacy Auth",
+    path: "/auth",
   },
 ];
 
@@ -106,7 +102,7 @@ const DesktopNav = () => {
   const { colorMode, toggleColorMode } = useColorMode();
   const { page } = useParams();
   const location = useLocation();
-  console.log(location.pathname);
+  //console.log(location.pathname);
   return (
     <>
       {console.log(page)}

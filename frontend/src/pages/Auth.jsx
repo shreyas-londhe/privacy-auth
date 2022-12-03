@@ -2,9 +2,9 @@ import React from "react";
 import { Box } from "@chakra-ui/react";
 
 import Navbar from "../components/Navbar";
-import SignUp from "../components/SignUp";
+import SignIn from "../components/SignIn";
 
-function Home() {
+function Auth() {
   return (
     <Box>
       <Navbar />
@@ -16,10 +16,10 @@ function Home() {
           height: "100vh",
         }}
       >
-        <SignUp />
+        <SignIn />
       </div>
     </Box>
   );
 }
 
-export default Home;
+export default Auth;
