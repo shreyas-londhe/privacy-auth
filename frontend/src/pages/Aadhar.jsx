@@ -9,7 +9,7 @@ function Aadhar() {
     <Box>
       <Navbar />
       <Center>HI</Center>
-      <Footer />
+      {/* <Footer /> */}
     </Box>
   );
 }
